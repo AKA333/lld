@@ -1,6 +1,7 @@
 // Singleton design pattern implementation
 #include <cstddef>
 #include <locale>
+#include <mutex>
 class singleton{
     static singleton *obj;
     singleton(){} 
@@ -78,5 +79,56 @@ int main(){
     Vehicle* myTruck= VehicleFactory::getVehicle("Truck");
     myTruck->setWheels();
     
+    return 0;
+}
+
+// Robust singleton pattern pointer return
+#include <bits/stdc++.h>
+#include <iostream>
+#include <thread>
+#include <mutex>
+
+using namespace std;
+
+once_flag flag;
+
+class Singleton{
+    Singleton() = default;
+    static Singleton* obj;
+    static int id;
+    public:
+    static Singleton* getInst(){
+        std::call_once(flag, [](){
+            obj = new Singleton();
+            id++;
+            cout<<"creating object with id:"<<id<<"\n";
+        });
+        cout<<"returning obj with id:"<< id<<"\n";
+        return obj;
+    }
+    Singleton (Singleton &obj) = delete;
+    Singleton& operator = (Singleton&) = delete;
+};
+
+Singleton* Singleton::obj = nullptr;
+int Singleton::id =0;
+
+int main()
+{
+//   Singleton* obj = Singleton::getInst();
+    // thread t1(&Singleton::getInst);
+    // thread t2(&Singleton::getInst);
+    
+    // Using Lambda function
+    thread t1 ( [] () {
+       Singleton::getInst(); 
+    });
+    
+    thread t2 ( [] () {
+        Singleton::getInst();
+    });
+    
+    t1.join(); t2.join();
+
     return 0;
 }
