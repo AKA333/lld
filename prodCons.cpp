@@ -1,11 +1,11 @@
 // Implementation for producer consumer problem
 // It can be stuck in a hanging state or starvation when consumer is
 // looking to consume without being produced by consumer
-// Given a fixed size buffer or queue where producer produces 
+// Given a fixed size buffer or queue where producer produces
 // And is consumed by the consumer until the end condition
-// The producer wait when queue is full and consumer waits or block 
+// The producer wait when queue is full and consumer waits or block
 // when the queue is empty
-// 
+//
 // What cv.notify_one() Actually Does
 // cv.notify_one() only signals that a waiting thread can wake up — it does NOT:
 
@@ -19,86 +19,91 @@
 
 #include <bits/stdc++.h>
 #include <condition_variable>
+#include <iostream>
 #include <mutex>
 #include <thread>
-#include "mutex"
 #include "condition_variable"
-
 using namespace std;
 
-class ProdCons{
+class ProducerConsumer {
+    queue<int>q;
+    int capacity;
+    int maxLimit;
+    int counter = 1;
+
     mutex mu;
     condition_variable cv;
-    int size;
-    queue<int>q;
-    int curr=1;
-    int range;
     public:
-    ProdCons(int sz, int range): size(sz), range(range){}
-    void producer(){
+    ProducerConsumer(int cap, int M): capacity(cap), maxLimit(M){}
+    void prod(){
         while(true){
-            unique_lock<mutex>lock(mu);
+            unique_lock<mutex> lock(mu);
             cv.wait(lock, [&](){
-                return q.size() < size || curr > range;
+                return q.size() < capacity || counter > maxLimit;
             });
-            
-            if(curr>range)
+
+            if(counter > maxLimit){
+                cv.notify_all();
                 break;
-            cout<<"Producer curr:"<<curr<<"\n";
-            q.push(curr);
-            curr++;
-            
+            }
+            cout<<"prod: "<<counter<<"\n";
+            q.push(counter);
+
+            counter++;
             cv.notify_one();
         }
     }
-    
-    void consumer(){
+
+    void cons(){
         while(true){
             unique_lock<mutex>lock(mu);
             cv.wait(lock, [&](){
-                return !q.empty() || curr>range;
+                return !q.empty() || counter > maxLimit;
             });
-            
-            if(curr > range && q.empty())
+
+            if (q.empty() && counter > maxLimit)
                 break;
+
             if(!q.empty()){
-                cout<<"Consumer curr:"<<q.front()<<"\n";
+                cout<<"cons: "<<q.front() <<"\n";
                 q.pop();
-                
                 cv.notify_one();
             }
+
         }
     }
 };
 
 int main(){
-    ProdCons obj(3, 10);
-    thread t1(&ProdCons::producer, &obj);
-    thread t2(&ProdCons::consumer, &obj);
-    
-    t1.join(); t2.join();
-    
+    ProducerConsumer obj(3, 10);
+    thread t1(&ProducerConsumer::prod, &obj);
+
+    thread t2(&ProducerConsumer::cons, &obj);
+
+    t1.join();
+    t2.join();
+
     return 0;
 }
 
-// Output- 
-// Producer curr:1
-// Producer curr:2
-// Producer curr:3
-// Consumer curr:1
-// Consumer curr:2
-// Consumer curr:3
-// Producer curr:4
-// Producer curr:5
-// Producer curr:6
-// Consumer curr:4
-// Consumer curr:5
-// Consumer curr:6
-// Producer curr:7
-// Producer curr:8
-// Producer curr:9
-// Consumer curr:7
-// Consumer curr:8
-// Consumer curr:9
-// Producer curr:10
-// Consumer curr:10
+// Output-
+// prod: 1
+// prod: 2
+// prod: 3
+// cons: 1
+// cons: 2
+// cons: 3
+// prod: 4
+// prod: 5
+// prod: 6
+// cons: 4
+// cons: 5
+// cons: 6
+// prod: 7
+// prod: 8
+// prod: 9
+// cons: 7
+// cons: 8
+// cons: 9
+// prod: 10
+// cons: 10
