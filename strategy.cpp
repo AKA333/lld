@@ -62,3 +62,59 @@ int main(){
 
     return 0;
 }
+
+// ****************************
+// #include <iostream>
+// #include <bits/stdc++.h>
+
+// using namespace std;
+
+// class Payment{
+//     public:
+//     virtual void pay(int amount) = 0;
+// };
+
+// class CC: public Payment {
+//    public: 
+//    CC () {}
+//    void pay(int amount){
+//        cout<<"paid by cc amount:"<<amount<<endl;
+//    }
+// };
+
+// class Upi: public Payment {
+//     public:
+//     Upi() {}
+//     void pay(int amount) {
+//         cout << "paid by upi amount:"<< amount <<endl;
+//     }
+// };
+
+// class Cart {
+//     Payment *mode;
+//     public:
+//     Cart(){
+//         mode = nullptr;
+//     }
+//     Payment* setStrategy(string method){
+//         if(method == "CC")
+//             mode = new CC();
+//         else if (method == "Upi")
+//             mode = new Upi();
+//         return mode;
+//     }
+// };
+
+// int main(){
+//     Cart shoppingCart;
+//     Payment* payment = shoppingCart.setStrategy("CC");
+//     payment->pay(400);
+    
+//     payment = shoppingCart.setStrategy("Upi");
+//     payment->pay(200);
+    
+//     payment = shoppingCart.setStrategy("CC");
+//     payment->pay(1000);
+    
+//     return 0;
+// }
